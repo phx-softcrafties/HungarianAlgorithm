@@ -25,6 +25,15 @@ class AllocationsTest {
 		]
 	}
 	
+	private def createValidWithFree(){
+		[
+			fac.create(0, new Worker(name:"dumb"),  new Job(name:"silly")),
+			fac.create(2, new Worker(name:"dumb"),  new Job(name:"billy")),
+			fac.create(0, new Worker(name:"nilly"), new Job(name:"silly")),
+			fac.create(0, new Worker(name:"nilly"), new Job(name:"billy"))
+		]
+	}
+	
 	@Test(expected=UnsupportedOperationException.class)
 	public void testNonEqualWorkersAndTasks(){
 		toTest = new Allocations(createUnequal())
@@ -67,6 +76,18 @@ class AllocationsTest {
 	}
 	
 	@Test
+	public void testNoCostAllocationForResource(){
+		Worker dumb = new Worker(name:"dumb")
+		toTest = new Allocations(createValidWithFree())
+		def expected = [ fac.create(0, dumb,  new Job(name:"silly")) ]
+		assertEquals expected, toTest.findNoCostAllocationsFor(dumb)
+		Worker nilly = new Worker(name:"nilly")
+		expected = [ fac.create(0, nilly,  new Job(name:"silly")), 
+					 fac.create(0, nilly,  new Job(name:"billy")) ]
+		assertEquals expected, toTest.findNoCostAllocationsFor(nilly)
+	}
+	
+	@Test
 	public void testFindAllAllocationsForTask(){
 		Task silly = new Job(name:"silly")
 		toTest = new Allocations(createValid())
@@ -81,5 +102,24 @@ class AllocationsTest {
 		toTest = new Allocations(createValid())
 		def expected = fac.create(1, new Worker(name:"dumb"),  new Job(name:"silly"))
 		assertEquals expected, toTest.findMinimumAllocationFor(silly)
+	}
+	
+	@Test
+	public void testNoCostAllocationForTask(){
+		Worker dumb = new Worker(name:"dumb")
+		Worker nilly = new Worker(name:"nilly")
+		Task silly = new Job(name:"silly")
+		toTest = new Allocations(createValidWithFree())
+		def expected = [ fac.create(0, dumb,  silly), fac.create(0, nilly,  silly) ]
+		assertEquals expected, toTest.findNoCostAllocationsFor(silly)
+		Task billy = new Job(name:"billy")
+		expected = [ fac.create(0, nilly,  billy) ]
+		assertEquals expected, toTest.findNoCostAllocationsFor(billy)
+	}
+	
+	@Test
+	public void testCanGetMatrixDimensions(){
+		toTest = new Allocations(createValid())
+		assertEquals 2, toTest.dimensions
 	}
 }

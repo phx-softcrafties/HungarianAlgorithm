@@ -46,16 +46,20 @@ class Allocations implements Iterable<Allocation> {
 		result
 	}
 	
-	public Set<Resource> getResources(){
+	public List<Resource> getResources(){
 		allocations.collect { it.resource }.unique()
 	}
 	
-	public Set<Task> getTasks(){
+	public List<Task> getTasks(){
 		allocations.collect { it.task }.unique()
 	}
 	
 	public List<Allocations> findAllAllocationsFor(Resource res){
 		allocations.findAll{ it.resource == res }.toList()
+	}
+	
+	public List<Allocations> findNoCostAllocationsFor(Resource res){
+		findAllAllocationsFor(res).findAll{ it.cost == 0 }.unique()
 	}
 	
 	public Allocation findMinimumAllocationFor(Resource res){
@@ -72,7 +76,30 @@ class Allocations implements Iterable<Allocation> {
 		allocs.min{ it.cost }
 	}
 	
-	public Iterator<Allocation> iterator(){
-		return getMatrix().iterator()
+	public List<Allocations> findNoCostAllocationsFor(Task tsk){
+		findAllAllocationsFor(tsk).findAll{ it.cost == 0 }.unique()
 	}
+	
+	public Iterator<Allocation> iterator(){
+		return allocations.iterator()
+	}
+	
+	public int getDimensions(){ getResources().size() }
+	
+	@Override
+	public boolean equals(Object another){
+		if(!(another instanceof Allocations)){
+			return false
+		}
+		def o = (Allocations) another
+		allocations.equals(o.allocations)
+	}
+	
+	@Override
+	public int hashCode(){
+		allocations.hashCode()
+	}
+	
+	@Override
+	public String toString() { "${allocations}" }
 }

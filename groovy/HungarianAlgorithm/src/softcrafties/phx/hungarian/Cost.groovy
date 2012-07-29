@@ -36,5 +36,5 @@ class Cost implements Allocation {
 	}
 	
 	@Override
-	public String toString() { "${worker} - ${job} - ${cost}" }
+	public String toString() { "${worker} - ${job} - ${cost} \n" }
 }
