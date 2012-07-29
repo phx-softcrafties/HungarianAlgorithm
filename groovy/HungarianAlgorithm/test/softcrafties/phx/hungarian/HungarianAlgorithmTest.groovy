@@ -43,7 +43,7 @@ class HungarianAlgorithmTest {
 	@Test
 	public void testComputeHungarian(){
 		def matrix = createFromWikipedia()
-		def results = HungarianAlgorithm.calculate(matrix.costs)
+		def results = HungarianAlgorithm.calculate(matrix.costs, new CostFactory())
 		assertEquals 3, results.size
 		def expected = [ 
 							new Cost(cost:1, resource:matrix.jim, task:matrix.bathroom),

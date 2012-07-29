@@ -9,12 +9,6 @@ class AllocationsTest {
 	private Allocations toTest
 	private CostFactory fac = new CostFactory()
 	
-	private def createNonSquare(){
-		[
-			fac.create(1, new Worker(name:"dumb"), new Job(name:"silly"))
-		]
-	}
-	
 	private def createUnequal(){
 		[
 			fac.create(1, new Worker(name:"dumb"),  new Job(name:"silly")),
@@ -32,11 +26,6 @@ class AllocationsTest {
 	}
 	
 	@Test(expected=UnsupportedOperationException.class)
-	public void testNonSquare(){
-		toTest = new Allocations(createNonSquare()) 
-	}
-	
-	@Test(expected=UnsupportedOperationException.class)
 	public void testNonEqualWorkersAndTasks(){
 		toTest = new Allocations(createUnequal())
 	}
@@ -46,12 +35,44 @@ class AllocationsTest {
 		toTest = new Allocations(createValid())
 	}
 	
+	@Test 
+	public void testGetResources(){
+		toTest = new Allocations(createValid())
+		def expected = [ new Worker(name:"dumb"),  new Worker(name:"nilly") ].toSet()
+		assertEquals expected, toTest.resources
+	}
+	
+	@Test
+	public void testGetTasks(){
+		toTest = new Allocations(createValid())
+		def expected = [ new Job(name:"silly"),  new Job(name:"billy") ].toSet()
+		assertEquals expected, toTest.tasks
+	}
+	
+	@Test
+	public void testFindAllAllocationsForResource(){
+		Worker dumb = new Worker(name:"dumb")
+		toTest = new Allocations(createValid())
+		def expected = [ fac.create(1, new Worker(name:"dumb"),  new Job(name:"silly")),
+						 fac.create(2, new Worker(name:"dumb"),  new Job(name:"billy")) ]
+		assertEquals expected, toTest.findAllAllocationsFor(dumb)
+	}
+	
 	@Test
 	public void testFindMinimumAllocationForResource(){
 		Worker dumb = new Worker(name:"dumb")
 		toTest = new Allocations(createValid())
 		def expected = fac.create(1, new Worker(name:"dumb"),  new Job(name:"silly"))
 		assertEquals expected, toTest.findMinimumAllocationFor(dumb)
+	}
+	
+	@Test
+	public void testFindAllAllocationsForTask(){
+		Task silly = new Job(name:"silly")
+		toTest = new Allocations(createValid())
+		def expected = [ fac.create(1, new Worker(name:"dumb"),  new Job(name:"silly")),
+						 fac.create(4, new Worker(name:"nilly"),  new Job(name:"silly")) ]
+		assertEquals expected, toTest.findAllAllocationsFor(silly)
 	}
 	
 	@Test

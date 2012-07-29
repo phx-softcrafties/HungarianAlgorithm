@@ -17,4 +17,7 @@ class Worker implements Resource{
 	public int hashCode(){
 		return name.hashCode()
 	}
+	
+	@Override
+	public String toString() { name }
 }

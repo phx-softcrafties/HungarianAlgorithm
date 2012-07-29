@@ -4,7 +4,7 @@ import softcrafties.phx.hungarian.abstractions.Allocation
 import softcrafties.phx.hungarian.abstractions.Resource
 import softcrafties.phx.hungarian.abstractions.Task
 
-class Allocations {
+class Allocations implements Iterable<Allocation> {
 	private Set<Allocation> allocations
 	
 	public Allocations(Collection<Allocation> alloc){
@@ -13,9 +13,6 @@ class Allocations {
 	}
 	
 	private void validate(Collection<Allocation> alloc){
-		if(alloc.size() % 2 != 0){
-			throw new UnsupportedOperationException("This matrix is not square")
-		}
 		int workers = countEm(alloc, "resource")
 		int tasks = countEm(alloc, "task")
 		if( workers != tasks ){
@@ -41,13 +38,41 @@ class Allocations {
 		}
 	}
 	
+	public Map<Resource, List<Allocations>> getMatrix(){
+		def result = [:]
+		getResources().each {
+			result[it] = findAllAllocationsFor(it)
+		}
+		result
+	}
+	
+	public Set<Resource> getResources(){
+		allocations.collect { it.resource }.unique()
+	}
+	
+	public Set<Task> getTasks(){
+		allocations.collect { it.task }.unique()
+	}
+	
+	public List<Allocations> findAllAllocationsFor(Resource res){
+		allocations.findAll{ it.resource == res }.toList()
+	}
+	
 	public Allocation findMinimumAllocationFor(Resource res){
-		def allocs = allocations.findAll{ it.resource == res }
+		def allocs = findAllAllocationsFor(res)
 		allocs.min{ it.cost } 
 	}
 	
+	public List<Allocations> findAllAllocationsFor(Task tsk){
+		allocations.findAll{ it.task == tsk }.toList()
+	}
+	
 	public Allocation findMinimumAllocationFor(Task tsk){
-		def allocs = allocations.findAll{ it.task == tsk }
+		def allocs = findAllAllocationsFor(tsk)
 		allocs.min{ it.cost }
+	}
+	
+	public Iterator<Allocation> iterator(){
+		return getMatrix().iterator()
 	}
 }

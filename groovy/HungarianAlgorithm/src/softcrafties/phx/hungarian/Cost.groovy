@@ -34,4 +34,7 @@ class Cost implements Allocation {
 	public int hashCode(){
 		return price.hashCode() + worker.hashCode() + job.hashCode()
 	}
+	
+	@Override
+	public String toString() { "${worker} - ${job} - ${cost}" }
 }

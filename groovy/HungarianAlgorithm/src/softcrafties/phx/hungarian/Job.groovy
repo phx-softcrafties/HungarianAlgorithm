@@ -17,4 +17,7 @@ class Job implements Task {
 	public int hashCode(){
 		return name.hashCode()
 	}
+	
+	@Override
+	public String toString() { name }
 }
