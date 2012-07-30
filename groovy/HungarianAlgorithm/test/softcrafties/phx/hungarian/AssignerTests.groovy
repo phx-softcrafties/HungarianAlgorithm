@@ -18,9 +18,11 @@ class AssignerTests {
 	Collection<Allocations> allocs
 	Assigner ass
 	Resource jim
-	Resource bob
-	Task running
-	Task eating
+	Resource steve
+	Resource alan
+	Task bathroom
+	Task floors
+	Task windows
 	
 	@Before
 	public void setup(){
@@ -33,12 +35,14 @@ class AssignerTests {
 	
 	public void setupResources(){
 		jim = new Worker(name:"Jim")
-		bob = new Worker(name:"Bob")
+		steve = new Worker(name:"Steve")
+		alan = new Worker(name:"Alan")
 	}
 	
 	public void setupTasks(){
-		running = new Job(name:"Running")
-		eating = new Job(name:"Eating")
+		bathroom = new Job(name:"Clean Bathrooms")
+		floors = new Job(name:"Sweep floors")
+		windows = new Job(name:"Wash windows")
 	}
 	
 	public def appendAllocation(double cost, Resource worker, Task job){
@@ -47,24 +51,24 @@ class AssignerTests {
 
 	@Test
 	public void testCanFullyAssignSuccessfullyDumb(){
-		appendAllocation(0, jim, running)
+		appendAllocation(0, jim, bathroom)
 		toAssign = new Allocations(allocs)
 		assertTrue ass.canFullyAssign(toAssign)
 	}
 	
 	@Test
 	public void testCannotFullyAssignSuccessfullyDumb(){
-		appendAllocation(5, jim, running)
+		appendAllocation(5, jim, bathroom)
 		toAssign = new Allocations(allocs)
 		assertFalse ass.canFullyAssign(toAssign)
 	}
 	
 	@Test
 	public void testCanFullyAssignSuccessfullyEasy(){
-		appendAllocation(0, jim, running)
-		appendAllocation(1, jim, eating)
-		appendAllocation(1, bob, running)
-		appendAllocation(0, bob, eating)
+		appendAllocation(0, jim, bathroom)
+		appendAllocation(1, jim, floors)
+		appendAllocation(1, steve, bathroom)
+		appendAllocation(0, steve, floors)
 		toAssign = new Allocations(allocs)
 		assertTrue ass.canFullyAssign(toAssign)		
 	}
@@ -72,43 +76,65 @@ class AssignerTests {
 	
 	@Test
 	public void testCannotFullyAssignSuccessfullyWhenTwoResourcesHaveEqualCost(){
-		appendAllocation(0, jim, running)
-		appendAllocation(1, jim, eating)
-		appendAllocation(0, bob, running)
-		appendAllocation(1, bob, eating)
+		appendAllocation(0, jim, bathroom)
+		appendAllocation(1, jim, floors)
+		appendAllocation(0, steve, bathroom)
+		appendAllocation(1, steve, floors)
 		toAssign = new Allocations(allocs)
 		assertFalse ass.canFullyAssign(toAssign)
 	}
 	
 	@Test
 	public void testCanFullyAssignSuccessfullyWhenSwapped(){
-		appendAllocation(1, jim, running)
-		appendAllocation(0, jim, eating)
-		appendAllocation(0, bob, running)
-		appendAllocation(1, bob, eating)
+		appendAllocation(1, jim, bathroom)
+		appendAllocation(0, jim, floors)
+		appendAllocation(0, steve, bathroom)
+		appendAllocation(1, steve, floors)
 		toAssign = new Allocations(allocs)
 		assertTrue ass.canFullyAssign(toAssign)
 	}
 	
 	@Test
 	public void testCanFullyAssignSuccessfullyWhenInvertedZeros(){
-		appendAllocation(0, jim, running)
-		appendAllocation(0, jim, eating)
-		appendAllocation(0, bob, running)
-		appendAllocation(1, bob, eating)
+		appendAllocation(0, jim, bathroom)
+		appendAllocation(0, jim, floors)
+		appendAllocation(0, steve, bathroom)
+		appendAllocation(1, steve, floors)
 		toAssign = new Allocations(allocs)
 		assertTrue ass.canFullyAssign(toAssign)
 	}
 	
 	@Test
 	public void testRemoveWorkerAndTask() {
-		appendAllocation(0, jim, running)
-		appendAllocation(0, jim, eating)
-		appendAllocation(0, bob, running)
-		appendAllocation(0, bob, eating)
+		appendAllocation(0, jim, bathroom)
+		appendAllocation(0, jim, floors)
+		appendAllocation(0, steve, bathroom)
+		appendAllocation(0, steve, floors)
 		toAssign = new Allocations(allocs)
-		def result = ass.assign(toAssign, jim, running)
-		def expected = new Allocations([fac.create(0, bob, eating)])
+		def result = ass.extractUnassigned(toAssign, jim, bathroom)
+		def expected = new Allocations([fac.create(0, steve, floors)])
 		assertEquals expected, result	
+	}
+	
+	@Test
+	public void testAssignWikipediaReduced(){
+		appendAllocation(0, jim, bathroom)
+		appendAllocation(1, jim, floors)
+		appendAllocation(2, jim, windows)
+		appendAllocation(0, steve, bathroom)
+		appendAllocation(0, steve, floors)
+		appendAllocation(0, steve, windows)
+		appendAllocation(1, alan, bathroom)
+		appendAllocation(1, alan, floors)
+		appendAllocation(0, alan, windows)
+		toAssign = new Allocations(allocs)
+		def seed = []
+		def result = ass.assign(toAssign, seed.toSet())
+		def expected = [
+							fac.create(0, jim, bathroom),
+							fac.create(0, steve, floors),
+							fac.create(0, alan, windows)
+					   ].toSet()
+		assertEquals expected, result
 	}
 }

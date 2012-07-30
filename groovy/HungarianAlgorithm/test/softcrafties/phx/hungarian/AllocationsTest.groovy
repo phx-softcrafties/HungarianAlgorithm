@@ -47,14 +47,14 @@ class AllocationsTest {
 	@Test 
 	public void testGetResources(){
 		toTest = new Allocations(createValid())
-		def expected = [ new Worker(name:"dumb"),  new Worker(name:"nilly") ].toSet()
+		def expected = [ new Worker(name:"dumb"),  new Worker(name:"nilly") ]
 		assertEquals expected, toTest.resources
 	}
 	
 	@Test
 	public void testGetTasks(){
 		toTest = new Allocations(createValid())
-		def expected = [ new Job(name:"silly"),  new Job(name:"billy") ].toSet()
+		def expected = [ new Job(name:"silly"),  new Job(name:"billy") ]
 		assertEquals expected, toTest.tasks
 	}
 	

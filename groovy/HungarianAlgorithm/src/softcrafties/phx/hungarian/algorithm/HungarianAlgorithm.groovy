@@ -4,19 +4,39 @@ import softcrafties.phx.hungarian.abstractions.Allocation;
 import softcrafties.phx.hungarian.abstractions.AllocationFactory
 
 class HungarianAlgorithm {
-
 	public static def calculate(Collection<Allocation> costs, AllocationFactory fac){
+		def original = new Allocations(costs)
 		def allocations = new Allocations(costs)
-		step4(step3(step2(step1(allocations, fac))))
+		def assignments = [].toSet()
+		if(!Assigner.assign(allocations, assignments))
+		{
+			allocations = step1(allocations, fac)
+		}
+		Assigner.assign(allocations, assignments)
+		def result = mapToOriginal(original, assignments)
+		result
+	}
+	
+	public static Collection<Allocation> mapToOriginal(Allocations original, Set<Allocation> assignments){
+		def answer =[].toSet()
+		assignments.each{
+			def found = original.find{ Allocation al ->
+				al.resource == it.resource && al.task == it.task 
+			}
+			answer.add(found)
+		}
+		answer
 	}
 	
 	public static def step1(Allocations costs, AllocationFactory fac){
 		def zeroed = subtractMinimumFromRows(costs, fac)
-		// assign(new Allocations(zeroed))
-		new Allocations(zeroed)
+		if(!Assigner.assign(zeroed, [].toSet())){
+			zeroed = step2(zeroed)
+		}
+		zeroed
 	}
 	
-	static def subtractMinimumFromRows(Allocations costs, AllocationFactory fac){
+	static Allocations subtractMinimumFromRows(Allocations costs, AllocationFactory fac){
 		def minimized = []
 		costs.matrix.each { it ->
 			def minRes = costs.findMinimumAllocationFor(it.key)
@@ -27,23 +47,15 @@ class HungarianAlgorithm {
 		minimized
 	}
 	
-	static def assign(Allocation costs){
-		Assigner ass = new Assigner(costs)
-		if(ass.canFullyAssign()){
-			return ass.assignments
-		}
-		println "costs is ${costs}"
+	public static Allocations step2(Allocations costs){
+		costs
 	}
 	
-	public static def step2(Allocations costs){
-		
+	public static Allocations step3(Allocations costs){
+		costs
 	}
 	
-	public static def step3(Allocations costs){
-		[]
-	}
-	
-	public static def step4(Allocations costs){
-		[]
+	public static Allocations step4(Allocations costs){
+		costs
 	}
 }

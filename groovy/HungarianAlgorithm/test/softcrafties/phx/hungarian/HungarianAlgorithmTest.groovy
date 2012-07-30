@@ -2,6 +2,7 @@ package softcrafties.phx.hungarian;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import softcrafties.phx.hungarian.abstractions.Allocation;
 import softcrafties.phx.hungarian.abstractions.Resource;
@@ -42,24 +43,25 @@ class HungarianAlgorithmTest {
 	}
 
 	@Test
-	public void testComputeHungarian(){
+	public void testComputeHungarianFromWikipedia(){
 		def matrix = createFromWikipedia()
 		def results = HungarianAlgorithm.calculate(matrix.costs, new CostFactory())
-		assertEquals 3, results.size
+		assertEquals 3, results.size()
+		def fac = new CostFactory()
 		def expected = [
-			new Cost(cost:1, resource:matrix.jim, task:matrix.bathroom),
-			new Cost(cost:3, resource:matrix.steve, task: matrix.floors),
-			new Cost(cost:2, resource:matrix.alan, task:matrix.windows)
-		]
-		assertArrayEquals(expected, results.toArray())
+			fac.create(1, matrix.jim, matrix.bathroom),
+			fac.create(3, matrix.steve, matrix.floors),
+			fac.create(2, matrix.alan, matrix.windows)
+		].toSet()
+		assertEquals(expected, results)
 	}
 
 	@Test
-	public void testStep1(){
+	public void testSubtractMinimumFromRows(){
 		def matrix = createFromWikipedia()
 		def costs = new Allocations(matrix.costs)
 		def fac = new CostFactory()
-		def results = HungarianAlgorithm.step1(costs, fac)
+		def results = HungarianAlgorithm.subtractMinimumFromRows(costs, fac)
 		def expected = [:]
 		expected[matrix.jim] = [
 			fac.create(0, matrix.jim, matrix.bathroom),
